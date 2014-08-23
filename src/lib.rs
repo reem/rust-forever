@@ -35,6 +35,14 @@ impl<T: Send + Sync> Forever<T> {
     pub fn inner(&self) -> &T {
         unsafe { mem::transmute(self.__data) }
     }
+
+    /// Drop the value stored in Forever.
+    ///
+    /// This is unsafe because you can trivially easily cause dangling
+    /// pointers if any other Forever's to the same data still exist.
+    pub unsafe fn destroy(self) {
+        drop(mem::transmute::<*mut T, Box<T>>(self.__data))
+    }
 }
 
 impl<T: Send + Sync> Clone for Forever<T> {
