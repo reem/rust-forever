@@ -7,11 +7,12 @@
 //! Shareable data that lasts forever, with no reference count.
 
 use std::mem;
+use std::kinds::marker;
 
 /// Shareable data that lasts forever, with no reference count.
-#[unsafe_no_drop_flag]
 pub struct Forever<T> {
-    __data: *mut T
+    __data: *mut T,
+    __marker: marker::NoCopy
 }
 
 impl<T: Send + Sync> Forever<T> {
@@ -24,7 +25,10 @@ impl<T: Send + Sync> Forever<T> {
     /// For that reason, this function is marked unsafe.
     #[inline]
     pub fn new(val: T) -> Forever<T> {
-        Forever { __data: unsafe { mem::transmute(box val) } }
+        Forever {
+            __data: unsafe { mem::transmute(box val) },
+            __marker: marker::NoCopy
+        }
     }
 
     /// Get an immutable reference to the contents of a Forever.
@@ -48,7 +52,10 @@ impl<T: Send + Sync> Forever<T> {
 impl<T: Send + Sync> Clone for Forever<T> {
     #[inline]
     fn clone(&self) -> Forever<T> {
-        Forever { __data: self.__data }
+        Forever {
+            __data: self.__data,
+            __marker: marker::NoCopy
+        }
     }
 }
 
@@ -59,11 +66,10 @@ impl<T: Send + Sync> Deref<T> for Forever<T> {
     }
 }
 
-#[unsafe_destructor]
-impl<T: Sync + Send> Drop for Forever<T> {
-    // Dropping this does nothing.
-    // This can be the source of memory leaks if you are not careful!
-    #[inline]
-    fn drop(&mut self) {}
+#[test] fn test_lasts() {
+    let a = Forever::new(7u); let b = a.clone();
+    spawn(proc() {
+        assert_eq!(*b, 7u);
+    });
 }
 
