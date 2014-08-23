@@ -23,8 +23,8 @@ impl<T: Send + Sync> Forever<T> {
     ///
     /// For that reason, this function is marked unsafe.
     #[inline]
-    pub unsafe fn new(val: T) -> Forever<T> {
-        Forever { __data: mem::transmute(box val) }
+    pub fn new(val: T) -> Forever<T> {
+        Forever { __data: unsafe { mem::transmute(box val) } }
     }
 
     /// Get an immutable reference to the contents of a Forever.

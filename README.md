@@ -10,8 +10,7 @@ with an always positive refcount.
 
 ```rust
 fn main() {
-    // unsafe because you can cause memory leaks if you are not careful
-    let a = unsafe { Forever::new(7u) };
+    let a = Forever::new(7u); // This could be a memory leak.
     let b = a.clone() // Same underlying data.
 
     spawn(proc() {
