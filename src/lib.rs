@@ -68,6 +68,7 @@ impl<T: Send + Sync> Deref<T> for Forever<T> {
 
 #[test] fn test_lasts() {
     let a = Forever::new(7u); let b = a.clone();
+    drop(a);
     spawn(proc() {
         assert_eq!(*b, 7u);
     });
