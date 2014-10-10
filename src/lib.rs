@@ -7,12 +7,10 @@
 //! Shareable data that lasts forever, with no reference count.
 
 use std::mem;
-use std::kinds::marker;
 
 /// Shareable data that lasts forever, with no reference count.
 pub struct Forever<T> {
     __data: *mut T,
-    __marker: marker::NoCopy
 }
 
 impl<T: Send + Sync> Forever<T> {
@@ -27,7 +25,6 @@ impl<T: Send + Sync> Forever<T> {
     pub fn new(val: T) -> Forever<T> {
         Forever {
             __data: unsafe { mem::transmute(box val) },
-            __marker: marker::NoCopy
         }
     }
 
@@ -49,16 +46,6 @@ impl<T: Send + Sync> Forever<T> {
     }
 }
 
-impl<T: Send + Sync> Clone for Forever<T> {
-    #[inline]
-    fn clone(&self) -> Forever<T> {
-        Forever {
-            __data: self.__data,
-            __marker: marker::NoCopy
-        }
-    }
-}
-
 impl<T: Send + Sync> Deref<T> for Forever<T> {
     #[inline]
     fn deref(&self) -> &T {
@@ -67,7 +54,7 @@ impl<T: Send + Sync> Deref<T> for Forever<T> {
 }
 
 #[test] fn test_lasts() {
-    let a = Forever::new(7u); let b = a.clone();
+    let a = Forever::new(7u); let b = a;
     drop(a);
     spawn(proc() {
         assert_eq!(*b, 7u);
