@@ -2,8 +2,6 @@
 #![deny(missing_doc)]
 #![deny(warnings)]
 
-#![feature(unsafe_destructor)]
-
 //! Shareable data that lasts forever, with no reference count.
 
 use std::mem;
